@@ -126,13 +126,8 @@ class UserRegistrationModelViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=validated_data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()
-            if user is not None:
-                response_data = {
-                    "email": user.email,
-                    # "username": user.username,
-                }
-                return Response(response_data, status=status.HTTP_201_CREATED)
-            serializer.send_confirmation_email(user)
+            if user:
+                return Response({'user': 'Успешно.'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -373,7 +368,6 @@ class ForgotPasswordConfirmChangeView(viewsets.ModelViewSet):
 
     def get_queryset(self, url=None):
         # Filter tokens by the specified URL if provided
-        print(url)
         if url:
             return PasswordChangeToken.objects.filter(url=url)  # Only tokens with the specified URL
         return PasswordChangeToken.objects.none()  # Return an empty queryset if no URL is provided
@@ -400,9 +394,9 @@ class ForgotPasswordConfirmChangeView(viewsets.ModelViewSet):
                         status=status.HTTP_404_NOT_FOUND)  # Возвращаем 404, если не найден
 
     def create(self, request, *args, **kwargs):
-        serializer = ForgotPasswordConfirmChangeSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)  # Валидация входящих данных
-
-        user = serializer.save()  # Сохранение данных
-        return Response({"detail": "Пароль успешно изменен."}, status=status.HTTP_201_CREATED)
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():  # Валидация входящих данных
+            user = serializer.save()  # Сохранение данных
+            return Response({"detail": "Пароль успешно изменен."}, status=status.HTTP_201_CREATED)
+        return Response({"detail": "Непредвиденная ошибка."}, status=status.HTTP_400_BAD_REQUEST)
 

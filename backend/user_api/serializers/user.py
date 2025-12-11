@@ -54,7 +54,7 @@ class UserLoginSerializer(serializers.Serializer):
     def check_user(self, clean_data):
         user = authenticate(email=clean_data['email'], password=clean_data['password'])
         if not user:
-            raise serializers.ValidationError('Email or password is incorrect')
+            raise serializers.ValidationError('Почта или пароль неверный')
         return user
 
 
@@ -79,7 +79,7 @@ class ChangePasswordSerializer(serializers.Serializer):
         user = request.user if request else None
 
         if not user:
-            raise serializers.ValidationError("Вы не зашли в аккаунт.")
+            raise serializers.ValidationError({"user": "Вы не зашли в аккаунт."})
 
         if not user.check_password(data.get('old_password')):
             raise serializers.ValidationError({"old_password": "Неправильный пароль."})
@@ -95,7 +95,7 @@ class ChangePasswordSerializer(serializers.Serializer):
         try:
             validate_password(new_password)
         except ValidationError as e:
-            raise serializers.ValidationError({"new_password": str(e)})
+            raise serializers.ValidationError({"new_password": "Неверный новый пароль"})
 
         return data
 
@@ -155,7 +155,7 @@ class UserChangeEmailSerializer(serializers.Serializer):
         user = request.user if request else None
 
         if not user:
-            raise ValidationError("Пользователь не вошёл в систему.")
+            raise ValidationError({"user": "Пользователь не вошёл в систему."})
 
         if not user.check_password(data.get('password')):
             raise ValidationError({"password": "Неправильный пароль."})
@@ -193,8 +193,10 @@ class UserForgotPasswordSerializer(serializers.Serializer):
         """
         try:
             user = UserModel.objects.get(email=value)
+            if not user.is_active:
+                raise serializers.ValidationError({"user": "Пользователь заблокирован."})
         except UserModel.DoesNotExist:
-            raise serializers.ValidationError("Пользователь с таким email не найден.")
+            raise serializers.ValidationError({"user": "Пользователь с таким email не найден."})
         return value
 
 
