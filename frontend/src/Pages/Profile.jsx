@@ -64,6 +64,11 @@ function Profile() {
         });
     } catch (error) {
       console.error("Error to user logout: ", error.response ? error.response.data : error.message);
+      setCurrentUser(false);
+      localStorage.removeItem('currentUser');
+      document.cookie = 'sessionid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'csrftoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      navigate('/profile');
     }
   };
 

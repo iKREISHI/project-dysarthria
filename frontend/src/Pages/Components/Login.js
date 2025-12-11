@@ -43,11 +43,11 @@ const Login = ({ setCurrentUser }) => {
         localStorage.setItem('currentUser', JSON.stringify(true));
         navigate('/');
       } else {
-        setError('Не корректные данные');
+        setError('Некорректные данные');
       }
     } catch (error) {
       console.error('Error logging in user: ', error);
-      setError('Не корректные данные');
+      setError('Некорректные данные');
     }
   };
 

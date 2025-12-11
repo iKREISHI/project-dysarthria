@@ -57,6 +57,7 @@ const Register = () => {
       });
       navigate('/profile/confirmation');
     } catch (error) {
+      setError('Некорректный Email');
       console.error('Error registering new user: ', error);
     }
   };
@@ -86,7 +87,7 @@ const Register = () => {
               <FormControl id="formBasicPassword" mb="4" isRequired>
                 <FormLabel>Пароль</FormLabel>
                 <InputGroup>
-                  <Input type={showPassword1 ? 'text' : 'password'} placeholder=" Введите пароль" value={password1} onChange={e => setPassword1(e.target.value)} />
+                  <Input type={showPassword1 ? 'text' : 'password'} placeholder="Введите пароль" value={password1} onChange={e => setPassword1(e.target.value)} />
                   <InputRightElement h={'full'}>
                     <Button variant={'ghost'} onClick={() => setShowPassword1((showPassword1) => !showPassword1)}>
                       {showPassword1 ? <ViewIcon /> : <ViewOffIcon />}
