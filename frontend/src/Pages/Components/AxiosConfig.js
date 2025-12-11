@@ -18,4 +18,3 @@ const getCSRFToken = () => {
   });
 
   export default axiosConfig;
-
