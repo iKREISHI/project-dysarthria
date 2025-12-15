@@ -9,7 +9,7 @@ const Tests = () => {
   const queryClient = useQueryClient();
   const { data: publicTests, isLoading, error } = useQuery(['public-tests'], fetchPublicTests);
   const [currentPage, setCurrentPage] = useState(1);
-  const [testsPerPage] = useState(12); // Количество тестов на странице
+  const [testsPerPage] = useState(12);
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
 
@@ -25,21 +25,38 @@ const Tests = () => {
   if (error) return <p>Ошибка: {error.message}</p>;
 
   const isLoadingTests = testQueries.some(query => query.isLoading);
-  const testData = testQueries.map(query => query.data).filter(Boolean);
+  
+  // Получаем все данные, включая возможные undefined/null
+  const testData = testQueries.map(query => query.data);
 
-  const filteredTests = testData.filter(test => 
-    test.test.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    test.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Безопасная фильтрация тестов для поиска
+  const filteredTests = testData.filter(test => {
+    // Проверяем, существует ли объект теста
+    if (!test) return false;
+    
+    const name = test.test?.name || '';
+    const description = test.description || '';
+    const query = searchQuery.toLowerCase();
+    
+    return name.toLowerCase().includes(query) || 
+           description.toLowerCase().includes(query);
+  });
 
   const getSuggestions = (value) => {
     const inputValue = value.trim().toLowerCase();
     const inputLength = inputValue.length;
 
-    return inputLength === 0 ? [] : testData.filter(test => 
-      test.test.name.toLowerCase().includes(inputValue) || 
-      test.description.toLowerCase().includes(inputValue)
-    );
+    if (inputLength === 0) return [];
+
+    return testData.filter(test => {
+      if (!test) return false;
+      
+      const name = test.test?.name || '';
+      const description = test.description || '';
+      
+      return name.toLowerCase().includes(inputValue) || 
+             description.toLowerCase().includes(inputValue);
+    });
   };
 
   const onSuggestionsFetchRequested = ({ value }) => {
@@ -57,16 +74,17 @@ const Tests = () => {
   };
 
   const handleSuggestionClick = (suggestion) => {
-    setSearchQuery(suggestion.test.name);
+    if (!suggestion) return;
+    
+    const name = suggestion.test?.name || '';
+    setSearchQuery(name);
     setSuggestions([]);
   };
 
-  // Получаем индексы первого и последнего теста на текущей странице
   const indexOfLastTest = currentPage * testsPerPage;
   const indexOfFirstTest = indexOfLastTest - testsPerPage;
   const currentTests = filteredTests.slice(indexOfFirstTest, indexOfLastTest);
 
-  // Изменяем страницу
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
@@ -89,13 +107,15 @@ const Tests = () => {
                 {suggestions.length > 0 && (
                   <ListGroup className="suggestions-list">
                     {suggestions.map(suggestion => (
-                      <ListGroup.Item 
-                        key={suggestion.id} 
-                        action 
-                        onClick={() => handleSuggestionClick(suggestion)}
-                      >
-                        {suggestion.test.name}
-                      </ListGroup.Item>
+                      suggestion && (
+                        <ListGroup.Item 
+                          key={suggestion.id} 
+                          action 
+                          onClick={() => handleSuggestionClick(suggestion)}
+                        >
+                          {suggestion?.test?.name || 'Без названия'}
+                        </ListGroup.Item>
+                      )
                     ))}
                   </ListGroup>
                 )}
@@ -109,22 +129,27 @@ const Tests = () => {
           {isLoadingTests ? (
             <p>Загрузка тестов...</p>
           ) : currentTests.length > 0 ? (
-            currentTests.map((test) => (
-              <Col key={test.id} sm={12} md={6} lg={4}>
-                <PublicTest
-                  name={test.test.name} 
-                  description={test.description} 
-                  id={test.id} 
-                  link={`/public-tests/test/${test.test.id}/`} 
-                />
-              </Col>
-            ))
+            currentTests.map((test) => {
+              // Проверяем, существует ли тест и имеет ли необходимые свойства
+              if (!test || !test.test || !test.test.name) {
+                return null; // Пропускаем некорректные тесты
+              }
+              
+              return (
+                <Col key={test.id} sm={12} md={6} lg={4}>
+                  <PublicTest
+                    name={test.test.name} 
+                    description={test.description || ''} 
+                    id={test.id} 
+                    link={`/public-tests/test/${test.test.id}/`} 
+                  />
+                </Col>
+              );
+            }).filter(Boolean) // Удаляем null элементы
           ) : (
             <div className='text-center'>
               <h1 className='text-center'>Тестов нет</h1>
-              <p>Новые тесты скоро , если тестов нет - сообщите 
-                администратору
-              </p>
+              <p>Новые тесты скоро появятся. Если тестов нет - сообщите администратору</p>
             </div>
           )}
         </Row>
@@ -145,7 +170,6 @@ const Tests = () => {
 
 export default Tests;
 
-// Компонент Pagination
 const Pagination = ({ testsPerPage, totalTests, paginate, currentPage }) => {
   const pageNumbers = [];
 
