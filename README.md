@@ -27,6 +27,17 @@ python manage.py migrate
 python manage.py runserver 8000 
 ```
 ## Frontend dev
+
+frontend env
+```bash
+cat > .env << EOF
+HOST=127.0.0.1
+PORT=3000
+# REACT_APP_BASE_URL=http://127.0.0.1:8000
+REACT_APP_BASE_URL=https://dysarthria.shspu.ru
+EOF
+```
+
 How to run frontend app.
 ```bash
 cd frontend/

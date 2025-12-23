@@ -100,6 +100,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1',
     'http://127.0.0.1:8000',
     'https://dysarthria.shspu.ru',
+    'https://dev-dysarthria.shspu45.ru'
 ]
 
 ROOT_URLCONF = 'project.urls'
