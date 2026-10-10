@@ -41,7 +41,7 @@ const AddTest = () => {
           king_json: {
             content: exercise.content,
             ...(exercise.type === '1' ? { missing_words: exercise.missingWords } :
-              exercise.type === '3' ? { missing_letters: exercise.missingWords } :
+              exercise.type === '3' ? { missing_words: exercise.missingWords } :
                 exercise.type === '4' ? { images: exercise.images, correct_order: exercise.correctOrder } :
                   { answers: exercise.answers, correct_answer: exercise.correctAnswer })
           },
@@ -65,7 +65,7 @@ const AddTest = () => {
           king_json: {
             content: exercise.content,
             ...(exercise.type === '1' ? { missing_words: exercise.missingWords } :
-              exercise.type === '3' ? { missing_letters: exercise.missingWords } :
+              exercise.type === '3' ? { missing_words: exercise.missingWords } :
                 exercise.type === '4' ? { images: exercise.images, correct_order: exercise.correctOrder } :
                   { answers: exercise.answers, correct_answer: exercise.correctAnswer })
           },
@@ -139,6 +139,26 @@ const AddTest = () => {
     setSelectedExercise(updatedExercise);
   };
 
+  const handleLetterClick = (letter, index) => {
+    if (!selectedExercise) return;
+
+    if (selectedExercise.missingWords.some(item => item.index === index)) return;
+
+    const updatedExercise = {
+      ...selectedExercise,
+      content: selectedExercise.content.slice(0, index) + '_' + selectedExercise.content.slice(index + letter.length),
+      missingWords: [
+          ...selectedExercise.missingWords,
+        {word: letter, index}
+      ]
+    };
+
+    setExercises(exercises.map(ex =>
+        ex.id === updatedExercise.id ? updatedExercise : ex
+    ));
+    setSelectedExercise(updatedExercise);
+  }
+
   const renderContentWithButtonsType1 = (content) => {
     return content.split(' ').map((word, index) => {
       let cleanedWord = word;
@@ -162,13 +182,13 @@ const AddTest = () => {
   const renderContentWithButtonsType3 = (content) => {
     return (
       <>
-        {content.split('').map((word, index) => (
+        {content.split('').map((letter, index) => (
           <Button
             key={index}
-            onClick={() => handleWordClick(word, index)}
+            onClick={() => handleLetterClick(letter, index)}
             style={{ margin: '5px' }}
           >
-            {word}
+           {letter === ' ' ? '\u00A0' : letter}
           </Button>
         ))}
       </>
@@ -357,15 +377,13 @@ const AddTest = () => {
                       onClick={() => removeExercise(selectedExercise.id)}
                       className="delete-btn"
                       style={{ marginLeft: '10px' }}
-                    >
-                    </Button>
+                    >Удалить</Button>
                     <Button
                       variant="danger"
                       onClick={handleSaveExercise}
                       className="save-btn"
                       style={{ marginLeft: '10px' }}
-                    >
-                    </Button>
+                    >Сохранить</Button>
                   </div>
                   <p>Название упражнения <input value={selectedExercise.name} onChange={(e) => handleExerciseFieldChange(e, "name")} className='input-exercise' /></p>
                   <p>Описание упражнения <input value={selectedExercise.description} onChange={(e) => handleExerciseFieldChange(e, "description")} className='input-exercise' /></p>
@@ -396,15 +414,13 @@ const AddTest = () => {
                       onClick={() => removeExercise(selectedExercise.id)}
                       className="delete-btn"
                       style={{ marginLeft: '10px' }}
-                    >
-                    </Button>
+                    >Удалить</Button>
                     <Button
                       variant="danger"
                       onClick={handleSaveExercise}
                       className="save-btn"
                       style={{ marginLeft: '10px' }}
-                    >
-                    </Button>
+                    >Сохранить</Button>
                   </div>
                   <p>Название упражнения <input value={selectedExercise.name} onChange={(e) => handleExerciseFieldChange(e, "name")} className='input-exercise' /></p>
                   <p>Описание упражнения <input value={selectedExercise.description} onChange={(e) => handleExerciseFieldChange(e, "description")} className='input-exercise' /></p>
@@ -455,15 +471,13 @@ const AddTest = () => {
                       onClick={() => removeExercise(selectedExercise.id)}
                       className="delete-btn"
                       style={{ marginLeft: '10px' }}
-                    >
-                    </Button>
+                    >Удалить</Button>
                     <Button
                       variant="danger"
                       onClick={handleSaveExercise}
                       className="save-btn"
-                      style={{ marginLeft: '10px' }} Со
-                    >
-                    </Button>
+                      style={{ marginLeft: '10px' }}
+                    >Сохранить</Button>
                   </div>
                   <p>Название упражнения <input value={selectedExercise.name} onChange={(e) => handleExerciseFieldChange(e, "name")} className='input-exercise' /></p>
                   <p>Описание упражнения <input value={selectedExercise.description} onChange={(e) => handleExerciseFieldChange(e, "description")} className='input-exercise' /></p>
@@ -494,15 +508,13 @@ const AddTest = () => {
                       onClick={() => removeExercise(selectedExercise.id)}
                       className="delete-btn"
                       style={{ marginLeft: '10px' }}
-                    >
-                    </Button>
+                    >Удалить</Button>
                     <Button
                       variant="danger"
                       onClick={handleSaveExercise}
                       className="save-btn"
                       style={{ marginLeft: '10px' }}
-                    >
-                    </Button>
+                    >Сохранить</Button>
                   </div>
                   <p>Название упражнения <input value={selectedExercise.name} onChange={(e) => handleExerciseFieldChange(e, "name")} className='input-exercise' /></p>
                   <p>Описание упражнения <input value={selectedExercise.description} onChange={(e) => handleExerciseFieldChange(e, "description")} className='input-exercise' /></p>

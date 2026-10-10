@@ -8,6 +8,34 @@ import axiosConfig from './Components/AxiosConfig';
 import { v4 as uuidv4 } from 'uuid';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
+const getCorrectAnswer = (exercise) => {
+  const kingJson = exercise.king_json || {};
+  if (exercise.type === 1) {
+    return (kingJson.missing_words || []).map(wordObj => wordObj.word);
+  }
+  if (exercise.type === 3) {
+    const content = kingJson.content || '';
+    const letterByIndex = {};
+    (kingJson.missing_words || []).forEach(item => {
+      letterByIndex[item.index] = item.word;
+    });
+    const groups = [];
+    for (const match of content.matchAll(/_+/g)) {
+      let group = '';
+      for (let i = 0; i < match[0].length; i += 1) {
+        const letter = letterByIndex[match.index + i];
+        group += letter !== undefined ? letter : '_';
+      }
+      groups.push(group);
+    }
+    return groups;
+  }
+  if (exercise.type === 4) {
+    return kingJson.correct_order;
+  }
+  return kingJson.correct_answer;
+};
+
 const TestPassing = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -122,10 +150,7 @@ const TestPassing = () => {
       return {
         exercise_id: answer.id,
         user_answer: answer.answer,
-        correct_answer: exercise.type === 1 ? (exercise.king_json.missing_words || []).map(wordObj => wordObj.word) :
-        exercise.type === 3 ? (exercise.king_json.missing_letters || []).map(letterObj => letterObj.word) :
-        exercise.type === 4 ? exercise.king_json.correct_order :
-        exercise.king_json.correct_answer
+        correct_answer: getCorrectAnswer(exercise)
       };
     });
 
